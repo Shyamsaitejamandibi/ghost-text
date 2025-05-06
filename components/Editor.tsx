@@ -34,18 +34,22 @@ export const Editor = () => {
     (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
       if ((e.key === "Enter" || e.key === "Tab") && ghost) {
         e.preventDefault();
+
+        // Only accept the completion portion, not the entire text
+        const completionPart = ghost.slice(text.length);
+
         if (e.key === "Tab") {
-          // For Tab, smoothly transition the text
-          const finalText = ghost;
+          // For Tab, smoothly transition the completion part
+          const finalText = text + completionPart;
           const steps = 3;
           const stepDuration = 30; // milliseconds
 
           for (let i = 1; i <= steps; i++) {
             setTimeout(() => {
-              const partialLength = Math.floor(
-                text.length + (ghost.length - text.length) * (i / steps)
+              const partialCompletionLength = Math.floor(
+                completionPart.length * (i / steps)
               );
-              setText(ghost.slice(0, partialLength));
+              setText(text + completionPart.slice(0, partialCompletionLength));
 
               if (i === steps) {
                 setText(finalText);
@@ -59,7 +63,7 @@ export const Editor = () => {
           }
         } else {
           // For Enter, instant completion
-          setText(ghost);
+          setText(text + completionPart);
           clearGhost();
           // Focus the textarea after completion
           if (textareaRef.current) {
